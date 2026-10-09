@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Questionário Frutare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..700&display=swap" rel="stylesheet">
+<style>
+  /* ===== Paleta Frutare ===== */
+  :root{
+    --branco:#ffffff;
+    --fundo:#f7fbf9;      /* fundo dos slides */
+    --linha:#dbe9e2;      /* linhas e áreas apagadas */
+    --suave:#b7e4c7;      /* seleção suave */
+    --claro:#74c69d;      /* destaque claro */
+    --medio:#52b788;      /* destaque ativo */
+    --verde:#2d6a4f;      /* capa, blocos fortes, fundo do logo */
+    --titulo:#014131;     /* títulos */
+    --escuro:#081c15;     /* balão */
+    --tinta:#424242;      /* texto principal */
+    --cinza:#6b7280;      /* texto secundário */
+    --neutro:#f5f5f5;
+    --terra:#8d6e63;      /* perguntas abertas / qualitativo */
+    --terra-esc:#5d4037;
+    --alerta:#d32f2f;     /* ponto de progresso e destaques pontuais */
+    --fonte:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    /* ===== Escala automática =====
+       --u = 1% da largura do maior quadro 16:9 que cabe na tela.
+       Tudo cresce ou diminui junto com a resolução, deixando só a borda --margem. */
+    --margem:2.2vmin;
+    --nav:clamp(48px,6.5vh,84px);
+    --u:min(calc((100vw - 2 * var(--margem)) / 100), calc((100vh - var(--nav) - 2 * var(--margem)) * 16 / 9 / 100));
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--fundo);color:var(--tinta);font-family:var(--fonte);font-size:max(15px, calc(var(--u) * 1.45));line-height:1.5;overflow:hidden;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+  :focus-visible{outline:3px solid var(--medio);outline-offset:3px;border-radius:4px}
+
+  /* ===== slides ===== */
+  .deck{position:fixed;inset:0}
+  .slide{position:absolute;inset:0;padding:var(--margem) var(--margem) calc(var(--nav) + var(--margem));display:flex;opacity:0;visibility:hidden;transform:translateY(12px);transition:opacity .45s ease,transform .45s ease,visibility 0s linear .45s;overflow-y:auto}
+  .slide.ativo{opacity:1;visibility:visible;transform:none;transition:opacity .45s ease,transform .45s ease}
+  .conteudo{width:calc(var(--u) * 100);max-width:100%;margin:auto;padding:0 calc(var(--u) * 3)}
+  h1,h2{font-weight:600;letter-spacing:-.02em;line-height:1.05;color:var(--titulo)}
+  h2{font-size:max(1.8rem, calc(var(--u) * 4.4));max-width:22ch;margin-bottom:calc(var(--u) * 3.2)}
+  .lead{font-size:max(1.05rem, calc(var(--u) * 1.9));color:var(--cinza);max-width:60ch}
+  .nota{font-size:max(.85rem, calc(var(--u) * 1.35));color:var(--cinza);max-width:72ch;margin-top:calc(var(--u) * 2.4)}
+
+  /* ===== capa ===== */
+  .capa{background:var(--verde);color:var(--branco)}
+  .capa .conteudo{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:calc(var(--u) * 4);align-items:center}
+  .capa h1{color:var(--branco);font-size:max(2.4rem, calc(var(--u) * 7));font-weight:600;max-width:11ch}
+  .capa .lead{color:var(--suave);margin-top:calc(var(--u) * 2.2);max-width:30ch}
+  .capa .rodape-capa{margin-top:calc(var(--u) * 5);font-size:max(.85rem, calc(var(--u) * 1.2));color:var(--linha)}
+  .capa .alunos{list-style:none;margin-top:calc(var(--u) * 1.2);font-size:max(.72rem, calc(var(--u) * .95));letter-spacing:.04em;color:var(--claro);line-height:1.7}
+  .capa .dica{margin-top:calc(var(--u) * 1.6);font-size:max(.72rem, calc(var(--u) * .95));color:var(--claro);opacity:.8}
+  .logo{justify-self:center;width:min(100%, calc(var(--u) * 34));aspect-ratio:4268 / 4298;position:relative;display:flex;align-items:center;justify-content:center}
+  .logo img{width:100%;height:100%;object-fit:contain;display:block}
+  .logo span{display:none}
+  .logo.vazio{border:1.5px dashed rgba(255,255,255,.35);border-radius:calc(var(--u) * 1.5)}
+  .logo.vazio span{display:block;font-size:max(.85rem, calc(var(--u) * 1.3));color:var(--suave)}
+
+  /* ===== decisões ===== */
+  .tres{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u) * 3.2);border-top:2px solid var(--verde);padding-top:calc(var(--u) * 2.4)}
+  .tres p{font-size:max(1.2rem, calc(var(--u) * 2.4));font-weight:500;line-height:1.2;color:var(--titulo)}
+  .tres span{display:block;font-size:max(.9rem, calc(var(--u) * 1.5));font-weight:400;color:var(--cinza);margin-top:calc(var(--u) * .9);line-height:1.45}
+
+  /* ===== objetivos ===== */
+  .geral{font-size:max(1.1rem, calc(var(--u) * 2.2));line-height:1.35;max-width:46ch;margin-bottom:calc(var(--u) * 4)}
+  .oes{display:grid;grid-template-columns:repeat(5,1fr);gap:calc(var(--u) * 1.6)}
+  .oes div{border-left:3px solid var(--medio);padding:calc(var(--u) * .3) 0 calc(var(--u) * .3) calc(var(--u) * 1.2)}
+  .oes b{display:block;color:var(--titulo);font-weight:600;margin-bottom:calc(var(--u) * .3)}
+  .oes p{font-size:max(.85rem, calc(var(--u) * 1.4));color:var(--cinza);line-height:1.4}
+
+  /* ===== quem responde ===== */
+  .duas{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:calc(var(--u) * 5.5);align-items:center}
+  .pomar{display:grid;grid-template-columns:repeat(6,1fr);gap:calc(var(--u) * 1.3);max-width:calc(var(--u) * 34)}
+  .pomar i{aspect-ratio:1;border-radius:50%;background:var(--linha);display:block}
+  .pomar i.meta{background:var(--verde)}
+  .legenda-pomar{margin-top:calc(var(--u) * 1.4);font-size:max(.85rem, calc(var(--u) * 1.3));color:var(--cinza)}
+  .regras li{list-style:none;padding:calc(var(--u) * 1.3) 0;border-bottom:1px solid var(--linha)}
+  .regras li:first-child{border-top:1px solid var(--linha)}
+  .regras b{color:var(--titulo);font-weight:600}
+
+  /* ===== chips de perguntas ===== */
+  .chips{display:grid;grid-template-columns:repeat(8,1fr);gap:calc(var(--u) * .7)}
+  .chip{aspect-ratio:1.25;border-radius:calc(var(--u) * .7);background:var(--branco);border:1px solid var(--linha);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--cinza);font-size:max(.85rem, calc(var(--u) * 1.3));transition:background .25s,color .25s,border-color .25s;cursor:help}
+  .chip:hover,.chip:focus-visible{outline:2px solid var(--alerta);outline-offset:2px}
+  .chip.on{background:var(--verde);border-color:var(--verde);color:var(--branco)}
+  .chip.ctx{background:var(--suave);border-color:var(--medio);color:var(--titulo)}
+  .chip.qual{background:var(--branco);border:1.5px solid var(--terra);color:var(--terra-esc)}
+
+  /* ===== hipóteses ===== */
+  .hip-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:calc(var(--u) * 4.5);align-items:start}
+  .hip-botoes{display:flex;gap:calc(var(--u) * .7);margin-bottom:calc(var(--u) * 2);flex-wrap:wrap}
+  .hip-botoes button{padding:calc(var(--u) * .8) calc(var(--u) * 1.6);border-radius:999px;border:1.5px solid var(--verde);font-weight:600;color:var(--verde);transition:background .2s,color .2s}
+  .hip-botoes button[aria-pressed="true"]{background:var(--verde);color:var(--branco)}
+  .hip-desc{font-size:max(1.1rem, calc(var(--u) * 2.1));line-height:1.35;min-height:5.5em;color:var(--tinta)}
+  .hip-fonte{margin-top:calc(var(--u) * 1.4);font-size:max(.85rem, calc(var(--u) * 1.4));color:var(--cinza)}
+  .chips-legenda{display:flex;gap:calc(var(--u) * 1.6);margin-top:calc(var(--u) * 1.2);font-size:max(.8rem, calc(var(--u) * 1.15));color:var(--cinza);flex-wrap:wrap}
+  .chips-legenda span::before{content:"";display:inline-block;width:.9em;height:.9em;border-radius:3px;margin-right:.45em;vertical-align:-.1em;background:var(--verde)}
+  .chips-legenda span.c::before{background:var(--suave);border:1px solid var(--medio)}
+  .dica-mouse{margin-top:calc(var(--u) * .8);font-size:max(.78rem, calc(var(--u) * 1.1));color:var(--cinza)}
+
+  /* ===== estrutura ===== */
+  .faixa{display:flex;gap:calc(var(--u) * .4);height:max(64px, calc(var(--u) * 8.5));margin-bottom:calc(var(--u) * 2)}
+  .faixa button{border-radius:calc(var(--u) * .8);background:var(--branco);border:1.5px solid var(--linha);text-align:left;padding:calc(var(--u) * .9) calc(var(--u) * 1);display:flex;flex-direction:column;justify-content:space-between;min-width:0;transition:background .2s,border-color .2s,color .2s}
+  .faixa button b{font-size:max(1.2rem, calc(var(--u) * 2.3));color:var(--titulo);line-height:1}
+  .faixa button small{font-size:max(.7rem, calc(var(--u) * 1.05));color:var(--cinza);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .faixa button[aria-pressed="true"]{background:var(--verde);border-color:var(--verde)}
+  .faixa button[aria-pressed="true"] b,.faixa button[aria-pressed="true"] small{color:var(--branco)}
+  .bloco-painel h3{font-size:max(1.1rem, calc(var(--u) * 1.7));font-weight:600;color:var(--titulo);margin-bottom:calc(var(--u) * .8)}
+  .bloco-painel ol{list-style:none;columns:2;column-gap:calc(var(--u) * 3.5)}
+  .bloco-painel li{break-inside:avoid;padding:calc(var(--u) * .55) 0;border-bottom:1px solid var(--linha);font-size:max(.85rem, calc(var(--u) * 1.4));line-height:1.4}
+
+  /* ===== fluxo ===== */
+  .controles{display:flex;gap:calc(var(--u) * 4);flex-wrap:wrap;margin-bottom:calc(var(--u) * 3)}
+  .controle p{font-size:max(.85rem, calc(var(--u) * 1.25));color:var(--cinza);margin-bottom:calc(var(--u) * .7)}
+  .seg{display:inline-flex;border:1.5px solid var(--verde);border-radius:calc(var(--u) * 1.2);overflow:hidden;flex-wrap:wrap}
+  .seg button{padding:calc(var(--u) * .7) calc(var(--u) * 1.2);font-size:max(.85rem, calc(var(--u) * 1.2));font-weight:500;color:var(--verde);transition:background .2s,color .2s}
+  .seg button[aria-pressed="true"]{background:var(--verde);color:var(--branco)}
+  .seg button:disabled{opacity:.35;cursor:not-allowed}
+  .trilha{display:flex;align-items:stretch;flex-wrap:wrap;row-gap:calc(var(--u) * 1.2)}
+  .no{display:flex;align-items:center}
+  .no .caixa{border-radius:calc(var(--u) * .8);padding:calc(var(--u) * .8) calc(var(--u) * .9);min-width:calc(var(--u) * 5.6);border:1.5px solid var(--verde);background:var(--branco);transition:opacity .3s,background .3s}
+  .no .caixa b{display:block;color:var(--titulo);font-size:max(1rem, calc(var(--u) * 1.5))}
+  .no .caixa small{color:var(--cinza);font-size:max(.72rem, calc(var(--u) * 1.02));line-height:1.25;display:block}
+  .no .seta{width:calc(var(--u) * 1.1);height:2px;background:var(--verde);margin:0 2px;transition:opacity .3s}
+  .no.filtro .caixa{background:var(--verde)}
+  .no.filtro .caixa b,.no.filtro .caixa small{color:var(--branco)}
+  .no.pulado .caixa{opacity:.35;border-style:dashed;background:transparent}
+  .no.pulado .seta{opacity:.25}
+  .contagem{margin-top:calc(var(--u) * 3);font-size:max(1.1rem, calc(var(--u) * 2))}
+  .contagem b{color:var(--alerta);font-weight:700}
+
+  /* ===== tipos ===== */
+  .quadrados{display:grid;grid-template-columns:repeat(23,1fr);gap:calc(var(--u) * .5);margin-bottom:calc(var(--u) * 2.2)}
+  .quadrados i{aspect-ratio:.6;border-radius:calc(var(--u) * .5);display:block;transition:opacity .25s;cursor:help}
+  .quadrados i:hover,.quadrados i:focus-visible{outline:2px solid var(--alerta);outline-offset:2px}
+  .q-fechada{background:var(--verde)}.q-semi{background:var(--claro)}.q-aberta{background:var(--terra)}
+  .quadrados.filtrando i:not(.ativo){opacity:.15}
+  .tipos-leg{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u) * 1.5)}
+  .tipos-leg button{text-align:left;padding:calc(var(--u) * 1.3) calc(var(--u) * 1.5);border-radius:calc(var(--u) * .9);border:1.5px solid var(--linha);background:var(--branco);transition:border-color .2s;position:relative;overflow:hidden}
+  .tipos-leg button::before{content:"";position:absolute;left:0;top:0;bottom:0;width:calc(var(--u) * .5);background:var(--cor)}
+  .tipos-leg button[aria-pressed="true"]{border-color:var(--cor)}
+  .tipos-leg b{font-size:max(1.6rem, calc(var(--u) * 3.6));color:var(--titulo);line-height:1;display:block}
+  .tipos-leg span{font-weight:600;color:var(--titulo)}
+  .tipos-leg p{font-size:max(.8rem, calc(var(--u) * 1.15));color:var(--cinza);margin-top:calc(var(--u) * .3)}
+
+  /* ===== escalas ===== */
+  .escalas{display:grid;grid-template-columns:repeat(5,1fr);gap:calc(var(--u) * 2)}
+  .escala{border-top:3px solid var(--verde);padding-top:calc(var(--u) * 1.3)}
+  .escala h3{font-size:max(1.1rem, calc(var(--u) * 1.75));font-weight:600;color:var(--titulo)}
+  .escala p{font-size:max(.8rem, calc(var(--u) * 1.3));color:var(--cinza);margin:calc(var(--u) * .5) 0 calc(var(--u) * 1.1);line-height:1.4;min-height:3.6em}
+  .escala .chips{grid-template-columns:repeat(4,1fr);gap:calc(var(--u) * .45)}
+  .escala .chip{font-size:max(.75rem, calc(var(--u) * 1.1));aspect-ratio:1}
+  .escala.qual{border-top-color:var(--terra)}
+
+  /* ===== dados da plataforma ===== */
+  .lista-limpa li{list-style:none;padding:calc(var(--u) * 1.05) 0;border-bottom:1px solid var(--linha)}
+  .lista-limpa li:first-child{border-top:1px solid var(--linha)}
+  .destaque{background:var(--verde);color:var(--branco);border-radius:calc(var(--u) * 1.3);padding:calc(var(--u) * 3)}
+  .destaque h3{font-size:max(1.2rem, calc(var(--u) * 2.2));font-weight:600;margin-bottom:calc(var(--u) * .9);color:var(--branco)}
+  .destaque p{color:var(--linha);font-size:max(.95rem, calc(var(--u) * 1.35))}
+
+  /* ===== tabela de leitura ===== */
+  .tabela-leitura{width:100%;border-collapse:collapse;font-size:max(.9rem, calc(var(--u) * 1.35))}
+  .tabela-leitura th{text-align:left;font-weight:600;color:var(--cinza);font-size:max(.8rem, calc(var(--u) * 1.15));padding:0 calc(var(--u) * 1.2) calc(var(--u) * .8) 0;border-bottom:2px solid var(--titulo)}
+  .tabela-leitura td{padding:calc(var(--u) * 1.05) calc(var(--u) * 1.2) calc(var(--u) * 1.05) 0;border-bottom:1px solid var(--linha);vertical-align:top;line-height:1.4}
+  .tabela-leitura td:first-child{font-weight:700;color:var(--verde);font-size:max(1.05rem, calc(var(--u) * 1.9));width:9%;line-height:1.1}
+  .tabela-leitura td:nth-child(2){width:36%;font-weight:500;color:var(--titulo)}
+  .rodape-limites{margin-top:calc(var(--u) * 2);font-size:max(.8rem, calc(var(--u) * 1.15));color:var(--cinza);display:flex;gap:.6em;align-items:baseline}
+  .rodape-limites::before{content:"";flex:none;width:.55em;height:.55em;border-radius:50%;background:var(--alerta);transform:translateY(-.1em)}
+
+  /* ===== fim ===== */
+  .fim h2{font-size:max(2.4rem, calc(var(--u) * 7.4));max-width:none}
+  .botao-forms{display:inline-flex;align-items:center;gap:.7em;margin-top:calc(var(--u) * 3);padding:calc(var(--u) * 1.3) calc(var(--u) * 2.4);border-radius:999px;background:var(--verde);color:var(--branco);text-decoration:none;font-weight:600;font-size:max(1rem, calc(var(--u) * 1.7));transition:background .2s}
+  .botao-forms:hover{background:var(--titulo)}
+  .botao-forms svg{width:1em;height:1em}
+
+  /* ===== balão ===== */
+  .balao{position:fixed;z-index:20;max-width:min(440px,80vw);background:var(--escuro);color:var(--fundo);padding:calc(var(--u) * .9) calc(var(--u) * 1.1);border-radius:calc(var(--u) * .7);font-size:max(.85rem, calc(var(--u) * 1.2));line-height:1.35;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s}
+  .balao.visivel{opacity:1;transform:none}
+  .balao b{display:block;color:var(--claro);font-weight:600;margin-bottom:2px}
+  .balao::after{content:"";position:absolute;left:var(--seta-x,50%);bottom:-6px;width:12px;height:12px;background:var(--escuro);transform:translateX(-50%) rotate(45deg)}
+  .balao.abaixo::after{bottom:auto;top:-6px}
+
+  /* ===== navegação ===== */
+  .barra{position:fixed;left:0;right:0;bottom:0;height:var(--nav);background:var(--fundo);transition:background .45s;display:flex;align-items:center;gap:calc(var(--nav) * .25);padding:0 calc(var(--margem) + var(--u) * 3);z-index:10}
+  .trilho{flex:1;height:2px;background:var(--linha);position:relative;border-radius:2px}
+  .trilho .feito{position:absolute;left:0;top:0;bottom:0;background:var(--medio);transition:width .45s ease}
+  .trilho .ponto{position:absolute;top:50%;width:calc(var(--nav) * .2);height:calc(var(--nav) * .2);border-radius:50%;background:var(--alerta);transform:translate(-50%,-50%);transition:left .45s ease}
+  .barra button{width:calc(var(--nav) * .6);height:calc(var(--nav) * .6);border-radius:50%;border:1.5px solid var(--verde);color:var(--verde);display:flex;align-items:center;justify-content:center}
+  .barra button svg{width:45%;height:45%}
+  .barra button:disabled{opacity:.3;cursor:default}
+  .barra .num{font-size:calc(var(--nav) * .24);color:var(--cinza);min-width:3.5em;text-align:right;font-variant-numeric:tabular-nums}
+  body.na-capa .barra{background:var(--verde)}
+  body.na-capa .barra button{border-color:var(--claro);color:var(--branco)}
+  body.na-capa .barra .num{color:var(--suave)}
+  body.na-capa .trilho{background:rgba(255,255,255,.2)}
+  body.na-capa .trilho .feito{background:var(--claro)}
+
+  /* ===== telas estreitas (celular em pé): layout empilhado ===== */
+  @media (max-aspect-ratio:1/1), (max-width:760px){
+    :root{--u:calc((100vw - 2 * var(--margem)) / 100)}
+    .conteudo{padding:0 4px}
+    .tres,.duas,.hip-wrap,.tipos-leg,.capa .conteudo{grid-template-columns:1fr}
+    .oes,.escalas{grid-template-columns:1fr 1fr}
+    .bloco-painel ol{columns:1}
+    .faixa button small{display:none}
+    .quadrados{grid-template-columns:repeat(12,1fr)}
+    .logo{order:-1;width:38%;justify-self:start}
+    .duas,.tres,.hip-wrap,.oes,.escalas,.tipos-leg{gap:18px}
+    .capa .conteudo{gap:20px}
+    h2{margin-bottom:20px}
+    .hip-botoes{gap:8px;margin-bottom:16px}
+    .hip-botoes button,.seg button{padding:8px 14px}
+    .chips{gap:6px}
+    .controles{gap:18px;margin-bottom:20px}
+    .faixa{gap:4px;margin-bottom:16px}
+    .faixa button,.tipos-leg button{padding:10px 12px 10px 16px}
+    .no .caixa{padding:8px 10px;min-width:64px}
+    .no .seta{width:10px}
+    .trilha{row-gap:10px}
+    .regras li,.lista-limpa li{padding:12px 0}
+    .destaque{padding:20px;border-radius:12px}
+    .contagem,.nota,.geral{margin-top:18px}
+    .geral{margin-bottom:22px}
+    .botao-forms{padding:14px 22px}
+  }
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body class="na-capa">
+<main class="deck" id="deck">
+
+  <!-- 1 Capa -->
+  <section class="slide capa ativo" aria-label="Capa">
+    <div class="conteudo">
+      <div>
+        <h1>O que o produtor pensa</h1>
+        <p class="lead">Questionário de validação de produto com os clientes atuais.</p>
+        <p class="rodape-capa">Prototipação de Produtos e Serviços, 2026</p>
+        <ul class="alunos" aria-label="Alunos">
+          <li>BERNARDO FERREIRA</li>
+          <li>GABRIEL MARQUES</li>
+          <li>LUCAS SCHAEDLER</li>
+          <li>MATEUS LANER</li>
+          <li>PEDRO LIMA</li>
+        </ul>
+        <p class="dica">Use as setas do teclado ou os botões abaixo para navegar.</p>
+      </div>
+      <!-- Logo: salve o arquivo como logo-frutare.png na mesma pasta deste index.html -->
+      <div class="logo" id="logo">
+        <img src="logo-frutare.png" alt="Frutare" onerror="this.parentNode.classList.add('vazio');this.remove()">
+        <span>logo Frutare</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 Decisões -->
+  <section class="slide" aria-label="Decisões">
+    <div class="conteudo">
+      <h2>Três decisões dependem destas respostas</h2>
+      <div class="tres">
+        <p>O que priorizar no produto<span>Quais funções sustentam o valor percebido e quais ficam de lado.</span></p>
+        <p>Se o preço atual faz sentido<span>Se o valor é aceito e se o modelo por usuário adicional trava as equipes.</span></p>
+        <p>O que construir em seguida<span>Quais ideias novas interessam e se elas estendem o núcleo do produto.</span></p>
+      </div>
+      <p class="nota">A Frutare organiza caderno de campo, estoque, custos e alertas a partir de áudios, textos e fotos que o produtor envia pelo WhatsApp. Hoje são 24 produtores atendidos, que somam 40 propriedades.</p>
+    </div>
+  </section>
+
+  <!-- 3 Objetivos -->
+  <section class="slide" aria-label="Objetivos">
+    <div class="conteudo">
+      <h2>Objetivos da pesquisa</h2>
+      <p class="geral">Entender como os produtores controlam a safra, onde estão as dificuldades e quanto valorizam cada função, para priorizar o desenvolvimento, validar o preço e levantar novas funções.</p>
+      <div class="oes">
+        <div><b>OE1</b><p>Mapear o controle da safra dentro e fora da Frutare</p></div>
+        <div><b>OE2</b><p>Distinguir problemas de registro dos de uso da informação</p></div>
+        <div><b>OE3</b><p>Medir conhecimento, uso e importância de cada função</p></div>
+        <div><b>OE4</b><p>Levantar e medir o interesse em funções novas</p></div>
+        <div><b>OE5</b><p>Validar o valor, a faixa de preço e o modelo de cobrança</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Quem responde -->
+  <section class="slide" aria-label="Quem responde">
+    <div class="conteudo duas">
+      <div>
+        <h2>Um censo: todos os produtores são convidados</h2>
+        <div class="pomar" id="pomar" aria-hidden="true"></div>
+        <p class="legenda-pomar">24 produtores, donos de 40 propriedades. A meta é ouvir pelo menos 15, ou 60%.</p>
+      </div>
+      <ul class="regras">
+        <li><b>Quem tem mais de uma propriedade</b> responde pensando no conjunto delas.</li>
+        <li><b>Quando o produtor delega,</b> o gerente responde até o bloco D e as perguntas de preço vão ao produtor.</li>
+        <li><b>Outros usuários da equipe</b> respondem uma versão curta, analisada à parte.</li>
+        <li><b>Análise descritiva,</b> sem testes estatísticos devido à abordagem censitária não probabilística.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5 Hipóteses -->
+  <section class="slide" aria-label="Hipóteses">
+    <div class="conteudo">
+      <h2>Cinco hipóteses, cada uma com suas perguntas</h2>
+      <div class="hip-wrap">
+        <div>
+          <div class="hip-botoes" id="hipBotoes" role="group" aria-label="Escolha uma hipótese"></div>
+          <p class="hip-desc" id="hipDesc" aria-live="polite"></p>
+          <p class="hip-fonte" id="hipFonte"></p>
+        </div>
+        <div>
+          <div class="chips" id="hipChips"></div>
+          <div class="chips-legenda"><span>Testa a hipótese</span><span class="c">Dá contexto</span></div>
+          <p class="dica-mouse">Passe o mouse sobre um número para ler a pergunta.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 Estrutura -->
+  <section class="slide" aria-label="Estrutura">
+    <div class="conteudo">
+      <h2>23 perguntas em seis blocos, do geral ao específico</h2>
+      <div class="faixa" id="faixa" role="group" aria-label="Blocos do questionário"></div>
+      <div class="bloco-painel" id="blocoPainel" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- 7 Fluxo -->
+  <section class="slide" aria-label="Fluxo do formulário">
+    <div class="conteudo">
+      <h2>Cada respondente vê só o que sabe responder</h2>
+      <div class="controles">
+        <div class="controle">
+          <p>Pergunta 14: participa da decisão de contratar?</p>
+          <div class="seg" id="segDecide"></div>
+        </div>
+        <div class="controle">
+          <p>Pergunta 15: chance de continuar na próxima safra</p>
+          <div class="seg" id="segContinua"></div>
+        </div>
+      </div>
+      <div class="trilha" id="trilha"></div>
+      <p class="contagem" id="contagem" aria-live="polite"></p>
+      <p class="nota">O filtro de decisão fica na pergunta 14, no início do bloco E. No Google Forms, o desvio só acontece ao final da seção; se o filtro abrisse o questionário, quem não decide pularia também os blocos B a D.</p>
+    </div>
+  </section>
+
+  <!-- 8 Tipos -->
+  <section class="slide" aria-label="Tipos de pergunta">
+    <div class="conteudo">
+      <h2>Mais perguntas fechadas, para comparar respostas</h2>
+      <div class="quadrados" id="quadrados"></div>
+      <div class="tipos-leg" id="tiposLeg" role="group" aria-label="Filtrar por tipo"></div>
+      <p class="nota">As abertas ficam onde o produtor precisa contar um caso, sugerir uma ideia ou dar um valor que não queremos induzir. Clique em um tipo para destacá-lo e passe o mouse sobre um retângulo para ler a pergunta.</p>
+    </div>
+  </section>
+
+  <!-- 9 Escalas -->
+  <section class="slide" aria-label="Escalas de medida">
+    <div class="conteudo">
+      <h2>A escala de cada pergunta define a análise possível</h2>
+      <div class="escalas" id="escalas"></div>
+      <p class="dica-mouse" style="margin-top:calc(var(--u) * 2)">Passe o mouse sobre um número para ler a pergunta.</p>
+    </div>
+  </section>
+
+  <!-- 10 Dados da plataforma -->
+  <section class="slide" aria-label="Dados da plataforma">
+    <div class="conteudo duas">
+      <div>
+        <h2>O que a plataforma já registra não é perguntado</h2>
+        <ul class="lista-limpa">
+          <li>Plano contratado, número de propriedades e área de pomar</li>
+          <li>Número de usuários de WhatsApp</li>
+          <li>Uso real de cada módulo</li>
+          <li>Canal de cada lançamento: WhatsApp ou painel</li>
+          <li>Renovação na próxima safra</li>
+        </ul>
+      </div>
+      <div class="destaque">
+        <h3>Confidencial, não anônimo</h3>
+        <p>O nome do produtor ou da conta (pergunta 23) liga as respostas aos dados de uso. As respostas individuais não chegam a quem negocia com o produtor, e os resultados saem sempre somados.</p>
+        <p style="margin-top:14px">A hipótese H2, sobre o canal de registro, é testada só com esses dados.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 Leitura dos dados -->
+  <section class="slide" aria-label="Análise e limitações">
+    <div class="conteudo">
+      <h2>Como os dados serão lidos</h2>
+      <table class="tabela-leitura">
+        <thead><tr><th scope="col">Hipótese</th><th scope="col">Em poucas palavras</th><th scope="col">Como ler o resultado</th></tr></thead>
+        <tbody>
+          <tr><td>H1</td><td>Valor concentrado em Estoque e Caderno de campo</td><td>Confirma se Estoque e Caderno lideram uso (P6), importância (P9) e as três escolhas (P10), conferido com o uso real.</td></tr>
+          <tr><td>H2</td><td>WhatsApp para o caderno, painel para os demais módulos</td><td>Confirma se a maioria dos lançamentos do caderno chega pelo WhatsApp e a dos outros módulos, pelo painel.</td></tr>
+          <tr><td>H3</td><td>Ferramentas paralelas ainda em uso</td><td>Confirma se a maioria dos produtores usa ao menos uma ferramenta além da Frutare (P2).</td></tr>
+          <tr><td>H4</td><td>Preço aceito, mas usuário adicional trava equipes</td><td>Confirma se o preço atual fica abaixo do limite de “caro demais” (P16 e P17) e se equipes de 4 ou mais pessoas deixam alguém de fora ou preferem outro modelo (P18 a P20).</td></tr>
+          <tr><td>H5</td><td>Ideias desejadas estendem o núcleo</td><td>Confirma se as ideias ligadas a custo, notas e relatórios lideram o interesse (P12) e a escolha forçada (P13).</td></tr>
+        </tbody>
+      </table>
+      <p class="rodape-limites">Limites: cada resposta vale cerca de 7% do total; produtores tendem a ser gentis com quem presta o serviço; intenção de continuar não é renovação; lembranças da safra são imprecisas; interesse em ideias hipotéticas costuma ser alto.</p>
+    </div>
+  </section>
+
+  <!-- 12 Fim -->
+  <section class="slide fim" aria-label="Encerramento">
+    <div class="conteudo">
+      <h2>Obrigado.</h2>
+      <p class="lead">O questionário é aplicado pelo Google Forms, com a mesma numeração do documento.</p>
+      <a class="botao-forms" href="https://docs.google.com/forms/d/e/1FAIpQLSdg-nn03aTI9KiTRvb62apy7p0XWylvl8aW9vZQNALL1Nx8ig/viewform" target="_blank" rel="noopener">
+        Abrir o formulário
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>
+      </a>
+    </div>
+  </section>
+</main>
+
+<div class="balao" id="balao" role="tooltip" aria-hidden="true"></div>
+<nav class="barra" aria-label="Navegação">
+  <button id="ant" aria-label="Slide anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button id="prox" aria-label="Próximo slide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+  <div class="trilho" aria-hidden="true"><span class="feito" id="feito"></span><span class="ponto" id="ponto"></span></div>
+  <span class="num" id="num" aria-live="polite"></span>
+</nav>
+
+<script>
+const BLOCOS = [{"id":"A","titulo":"Bloco A – Perfil","perguntas":["1. Qual é o seu papel na propriedade?"]},{"id":"B","titulo":"Bloco B – Como você controla a safra hoje","perguntas":["2. Nesta safra, além da Frutare, o que mais você usa para registrar aplicações, estoque, custos ou colheita?"]},{"id":"C","titulo":"Bloco C – Dificuldades","perguntas":["3. Toda propriedade passa por momentos em que o controle falha. Conte a última vez que isso aconteceu na sua e se ocorreu algum problema por essa falta de controle.","4. Nesta safra, desde a poda, isto aconteceu na sua propriedade?","5. Na última vez que houve risco de geada, granizo ou doença nesta safra, o aviso chegou a tempo de você agir?"]},{"id":"D","titulo":"Bloco D – Funções da Frutare e ideias novas","perguntas":["6. Como está o seu uso de cada função da Frutare hoje?","7. Quando recebe um alerta da Frutare pelo WhatsApp (doença, granizo, geada), o que costuma fazer?","8. Seu consultor envia as recomendações pela Frutare?","9. Qual a importância de cada função para a sua propriedade?","10. Quais são as três funções mais importantes para você?","11. Que função você gostaria que a Frutare tivesse e que ainda não tem?","12. Estas são ideias em estudo, sem prazo nem compromisso de entrega. Quanto cada uma te interessaria?","13. Se a Frutare só pudesse fazer uma dessas ideias, qual você escolheria?"]},{"id":"E","titulo":"Bloco E – Continuidade e preço","perguntas":["14. Você participa da decisão de contratar e pagar a Frutare?","15. Qual a chance de a sua propriedade continuar usando a Frutare na próxima safra?","15b. O que faria diferença para você continuar?","16. Pelo que você recebe da Frutare, o valor que paga hoje é:","17. Pensando na sua propriedade, com as pessoas que usam a Frutare hoje, responda em R$ por mês:","17a. A partir de que valor total começaria a ficar caro, mas você ainda consideraria?","17b. A partir de que valor total seria caro demais e você não contrataria?","18a. Qual forma de cobrança seria mais justa para a sua propriedade? Escolha a 1ª preferida.","18b. E qual seria a 2ª preferida?","18c. Em uma frase, por que escolheu a 1ª? Se marcou “Outra”, descreva qual.","19. Sobre o valor cobrado por usuário adicional, o que acontece na sua propriedade?"]},{"id":"F","titulo":"Bloco F – Sobre a propriedade","perguntas":["20. Quantas pessoas trabalham de forma fixa na propriedade durante a safra, contando você?","21. A propriedade participa da Produção Integrada de Maçã (PIM) ou passa por auditoria?"]},{"id":"FIM","titulo":"Fechamento","perguntas":["22. Quer deixar algum comentário, crítica ou sugestão?","23. Seu nome ou o nome da sua conta na Frutare"]}];
+const N = 23;
+
+/* ---------- texto das perguntas, tirado do questionário ---------- */
+const TEXTO={};
+BLOCOS.forEach(b=>b.perguntas.forEach(t=>{const m=t.match(/^(\d+)[a-z]?\.\s*(.*)$/);if(m&&!TEXTO[m[1]])TEXTO[m[1]]=m[2]}));
+TEXTO[17]='Pensando na sua propriedade, em R$ por mês: a partir de que valor total começaria a ficar caro, e a partir de que valor total seria caro demais?';
+TEXTO[18]='Qual forma de cobrança seria mais justa para a sua propriedade? (1ª e 2ª preferidas)';
+
+/* ---------- tipos de pergunta ---------- */
+const TIPO={fechada:[4,5,6,7,8,9,10,12,13,14,16,19,20,21],semi:[1,2,15,18],aberta:[3,11,17,22,23]};
+const tipoDe=n=>Object.keys(TIPO).find(k=>TIPO[k].includes(+n));
+const NOME_TIPO={fechada:'fechada',semi:'semiaberta',aberta:'aberta'};
+
+/* ---------- navegação ---------- */
+const slides=[...document.querySelectorAll('.slide')];
+let atual=0;
+function ir(n){
+  n=Math.max(0,Math.min(slides.length-1,n));
+  slides[atual].classList.remove('ativo');
+  escondeBalao();
+  atual=n;
+  slides[atual].classList.add('ativo');
+  slides[atual].scrollTop=0;
+  document.body.classList.toggle('na-capa',atual===0);
+  const p=slides.length>1?atual/(slides.length-1)*100:0;
+  document.getElementById('feito').style.width=p+'%';
+  document.getElementById('ponto').style.left=p+'%';
+  document.getElementById('num').textContent=(atual+1)+' / '+slides.length;
+  document.getElementById('ant').disabled=atual===0;
+  document.getElementById('prox').disabled=atual===slides.length-1;
+  history.replaceState(null,'','#'+(atual+1));
+}
+document.getElementById('ant').onclick=()=>ir(atual-1);
+document.getElementById('prox').onclick=()=>ir(atual+1);
+document.addEventListener('keydown',e=>{
+  const emControle=e.target.closest('button,a');
+  if(e.key==='ArrowRight'||e.key==='PageDown'||(e.key===' '&&!emControle)){e.preventDefault();ir(atual+1)}
+  if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();ir(atual-1)}
+  if(e.key==='Home')ir(0);
+  if(e.key==='End')ir(slides.length-1);
+  if(e.key==='Escape')escondeBalao();
+});
+let toqueX=null;
+document.addEventListener('touchstart',e=>{toqueX=e.touches[0].clientX;if(!e.target.closest('[data-n]'))escondeBalao()},{passive:true});
+document.addEventListener('touchend',e=>{if(toqueX===null)return;const d=e.changedTouches[0].clientX-toqueX;if(Math.abs(d)>60)ir(atual+(d<0?1:-1));toqueX=null});
+
+/* ---------- balão com a pergunta (slides 5, 8 e 9) ---------- */
+const balao=document.getElementById('balao');
+function mostraBalao(el){
+  const n=el.dataset.n;
+  balao.innerHTML='';
+  const b=document.createElement('b');b.textContent='Pergunta '+n+' ('+NOME_TIPO[tipoDe(n)]+')';
+  balao.appendChild(b);balao.appendChild(document.createTextNode(TEXTO[n]));
+  balao.classList.add('visivel');
+  const r=el.getBoundingClientRect(),bw=balao.offsetWidth,bh=balao.offsetHeight;
+  let x=r.left+r.width/2-bw/2;x=Math.max(8,Math.min(x,innerWidth-bw-8));
+  let y=r.top-bh-12,abaixo=false;if(y<8){y=r.bottom+12;abaixo=true}
+  balao.classList.toggle('abaixo',abaixo);
+  balao.style.left=x+'px';balao.style.top=y+'px';
+  balao.style.setProperty('--seta-x',(r.left+r.width/2-x)+'px');
+}
+function escondeBalao(){balao.classList.remove('visivel')}
+function ligaBalao(el,n){
+  el.dataset.n=n;el.tabIndex=0;
+  el.setAttribute('aria-label','Pergunta '+n+', '+NOME_TIPO[tipoDe(n)]+': '+TEXTO[n]);
+  el.addEventListener('mouseenter',()=>mostraBalao(el));
+  el.addEventListener('mouseleave',escondeBalao);
+  el.addEventListener('focus',()=>mostraBalao(el));
+  el.addEventListener('blur',escondeBalao);
+  el.addEventListener('click',()=>mostraBalao(el));
+}
+function chip(n){const el=document.createElement('span');el.className='chip';el.textContent=n;ligaBalao(el,n);return el}
+
+/* ---------- pomar ---------- */
+const pomar=document.getElementById('pomar');
+for(let i=0;i<24;i++){const d=document.createElement('i');if(i<15)d.className='meta';pomar.appendChild(d)}
+
+/* ---------- hipóteses ---------- */
+const HIP={
+  H1:{d:'O valor percebido se concentra em Estoque e Caderno de campo; Mão de obra, Máquinas e os alertas têm uso e importância menores.',f:'Perguntas 5 a 10 e 21, mais o uso real nos registros da plataforma.',on:[5,6,7,8,9,10,21],ctx:[]},
+  H2:{d:'O WhatsApp sustenta o registro do caderno de campo, mas caixa, estoque, diesel e mão de obra são lançados sobretudo no painel.',f:'Testada só com os registros da plataforma (canal de cada lançamento); nenhuma pergunta do questionário.',on:[],ctx:[]},
+  H3:{d:'Mesmo o cliente ativo mantém planilha, caderno de papel ou consultor em paralelo: a Frutare ainda não substitui tudo.',f:'Pergunta 2.',on:[2],ctx:[]},
+  H4:{d:'O preço de hoje é aceito, mas o valor por usuário adicional trava produtores com equipe, e parte dos produtores preferiria cobrança por área ou por módulos.',f:'Perguntas 16 a 19 cruzadas com o tamanho da equipe (20) e o cadastro.',on:[16,17,18,19,20],ctx:[]},
+  H5:{d:'As funções novas mais desejadas são extensões do núcleo (custo, comprovação, notas fiscais, relatórios), não produtos distantes dele.',f:'Perguntas 11 a 13, com as perguntas 3 e 4 como contexto.',on:[11,12,13],ctx:[3,4]}
+};
+const hipBotoes=document.getElementById('hipBotoes'),hipChips=document.getElementById('hipChips');
+const chipsH=[];for(let n=1;n<=N;n++){const c=chip(n);chipsH.push(c);hipChips.appendChild(c)}
+function mostraHip(k){
+  [...hipBotoes.children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));
+  document.getElementById('hipDesc').textContent=HIP[k].d;
+  document.getElementById('hipFonte').textContent='Fonte: '+HIP[k].f;
+  chipsH.forEach((c,i)=>{c.classList.toggle('on',HIP[k].on.includes(i+1));c.classList.toggle('ctx',HIP[k].ctx.includes(i+1))});
+}
+Object.keys(HIP).forEach(k=>{const b=document.createElement('button');b.textContent=k;b.dataset.k=k;b.onclick=()=>mostraHip(k);hipBotoes.appendChild(b)});
+mostraHip('H1');
+
+/* ---------- estrutura ---------- */
+const faixa=document.getElementById('faixa'),painel=document.getElementById('blocoPainel');
+const NOMES_CURTOS={A:'Perfil',B:'Controle da safra',C:'Dificuldades',D:'Funções e ideias',E:'Continuidade e preço',F:'Propriedade',FIM:'Fechamento'};
+const numeroDe=t=>{const m=t.match(/^(\d+)/);return m?+m[1]:null};
+function mostraBloco(id){
+  [...faixa.children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===id));
+  const b=BLOCOS.find(x=>x.id===id);
+  painel.innerHTML='';
+  const h=document.createElement('h3');h.textContent=b.titulo;painel.appendChild(h);
+  const ol=document.createElement('ol');b.perguntas.forEach(t=>{const li=document.createElement('li');li.textContent=t;ol.appendChild(li)});painel.appendChild(ol);
+}
+BLOCOS.forEach(b=>{
+  const nums=[...new Set(b.perguntas.map(numeroDe).filter(Boolean))];
+  const btn=document.createElement('button');btn.dataset.id=b.id;btn.style.flex=Math.max(nums.length,1);
+  btn.innerHTML='<b>'+(b.id==='FIM'?'Fim':b.id)+'</b><small>'+NOMES_CURTOS[b.id]+'</small>';
+  btn.setAttribute('aria-label',b.titulo+', '+nums.length+(nums.length>1?' perguntas':' pergunta'));
+  btn.onclick=()=>mostraBloco(b.id);faixa.appendChild(btn);
+});
+mostraBloco('A');
+
+/* ---------- fluxo ---------- */
+const NOS=[
+  {id:'A',t:'Bloco A',s:'pergunta 1',q:1},{id:'B',t:'Bloco B',s:'pergunta 2',q:1},{id:'C',t:'Bloco C',s:'3 a 5',q:3},{id:'D',t:'Bloco D',s:'6 a 13',q:8},
+  {id:'14',t:'14',s:'decide?',q:1,filtro:true},{id:'15',t:'15',s:'continuar?',q:1},{id:'15b',t:'15b',s:'o que faria diferença',q:1},
+  {id:'E',t:'16 a 19',s:'preço',q:7},{id:'F',t:'Bloco F',s:'20 e 21',q:2},{id:'FIM',t:'Fim',s:'22 e 23',q:2}
+];
+const TOTAL=NOS.reduce((a,n)=>a+n.q,0);
+const OPC=['Com certeza não','Provavelmente não','Ainda não sei','Provavelmente sim','Com certeza sim'];
+let decide='Sim',continua='Com certeza sim';
+const segD=document.getElementById('segDecide'),segC=document.getElementById('segContinua'),trilha=document.getElementById('trilha');
+['Sim','Não'].forEach(v=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>{decide=v;desenhaFluxo()};segD.appendChild(b)});
+OPC.forEach(v=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>{continua=v;desenhaFluxo()};segC.appendChild(b)});
+NOS.forEach((n,i)=>{
+  const w=document.createElement('div');w.className='no'+(n.filtro?' filtro':'');w.dataset.id=n.id;
+  w.innerHTML='<div class="caixa"><b>'+n.t+'</b><small>'+n.s+'</small></div>'+(i<NOS.length-1?'<span class="seta"></span>':'');
+  trilha.appendChild(w);
+});
+function desenhaFluxo(){
+  [...segD.children].forEach(b=>b.setAttribute('aria-pressed',b.textContent===decide));
+  [...segC.children].forEach(b=>{b.setAttribute('aria-pressed',b.textContent===continua);b.disabled=decide==='Não'});
+  const pula=new Set();
+  if(decide==='Não'){['15','15b','E'].forEach(x=>pula.add(x))}
+  else if(OPC.indexOf(continua)>2){pula.add('15b')}
+  let vistos=0;
+  [...trilha.children].forEach(el=>{const n=NOS.find(x=>x.id===el.dataset.id);const p=pula.has(n.id);el.classList.toggle('pulado',p);if(!p)vistos+=n.q});
+  const quem=decide==='Não'?'Quem não decide':'Quem decide e responde “'+continua.toLowerCase()+'”';
+  document.getElementById('contagem').innerHTML=quem+' vê <b>'+vistos+'</b> dos '+TOTAL+' itens do formulário.';
+}
+desenhaFluxo();
+
+/* ---------- tipos ---------- */
+const quad=document.getElementById('quadrados'),leg=document.getElementById('tiposLeg');
+const qs=[];for(let n=1;n<=N;n++){const i=document.createElement('i');i.className='q-'+tipoDe(n);ligaBalao(i,n);quad.appendChild(i);qs.push(i)}
+const INFO={fechada:['Fechadas','Escolha entre alternativas: fáceis de responder e de comparar.','var(--verde)'],semi:['Semiabertas','Alternativas mais um campo “Outro” ou um porquê.','var(--claro)'],aberta:['Abertas','Texto livre, valores em reais e identificação.','var(--terra)']};
+let filtroTipo=null;
+Object.keys(INFO).forEach(k=>{
+  const b=document.createElement('button');b.dataset.k=k;b.setAttribute('aria-pressed','false');b.style.setProperty('--cor',INFO[k][2]);
+  b.innerHTML='<b>'+TIPO[k].length+'</b><span>'+INFO[k][0]+'</span><p>'+INFO[k][1]+'</p>';
+  b.onclick=()=>{filtroTipo=filtroTipo===k?null:k;[...leg.children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.k===filtroTipo));quad.classList.toggle('filtrando',!!filtroTipo);qs.forEach((q,i)=>q.classList.toggle('ativo',!!filtroTipo&&tipoDe(i+1)===filtroTipo))};
+  leg.appendChild(b);
+});
+
+/* ---------- escalas ---------- */
+const ESC=[
+  ['Nominal','Classifica. Permite contar frequências e cruzar grupos.',[1,2,4,5,7,8,10,13,14,19,21,23]],
+  ['Ordinal','Ordena. Permite mediana e distribuição.',[6,16,18,20]],
+  ['Intervalar','Mede distâncias. Permite média, com a distribuição ao lado.',[9,12,15]],
+  ['Razão','Tem zero real. Permite mediana, quartis e comparar valores.',[17]],
+  ['Qualitativo','Texto livre, codificado por tema.',[3,11,22]]
+];
+const esc=document.getElementById('escalas');
+ESC.forEach(([nome,desc,nums])=>{
+  const qual=nome==='Qualitativo';
+  const d=document.createElement('div');d.className='escala'+(qual?' qual':'');
+  const h=document.createElement('h3');h.textContent=nome;const p=document.createElement('p');p.textContent=desc;d.append(h,p);
+  const c=document.createElement('div');c.className='chips';nums.forEach(n=>{const k=chip(n);k.classList.add(qual?'qual':'on');c.appendChild(k)});
+  d.appendChild(c);esc.appendChild(d);
+});
+
+/* ---------- início ---------- */
+const h=parseInt(location.hash.slice(1),10);
+ir(isNaN(h)?0:h-1);
+</script>
+</body>
+</html>
